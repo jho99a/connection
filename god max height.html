@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>The only connection you need is God</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;900&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #fff;
+      color: #000;
+      overflow: hidden;
+    }
+    body {
+      box-sizing: border-box;
+      height: 100vh;
+      height: 100dvh; /* accounts for the phone's address bar */
+      padding:
+        calc(4vmin + env(safe-area-inset-top, 0px))
+        calc(4vmin + env(safe-area-inset-right, 0px))
+        calc(4vmin + env(safe-area-inset-bottom, 0px))
+        calc(4vmin + env(safe-area-inset-left, 0px));
+    }
+    #stage {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #msg {
+      margin: 0;
+      width: 100%;
+      text-align: center;
+      font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+      font-weight: 500;
+    }
+    #lead {
+      display: block;
+      line-height: 0.95;
+      font-size: 8vw; /* starting size; the script scales it */
+    }
+    #god {
+      display: block;
+      font-weight: 900;
+      white-space: nowrap;
+      line-height: 0.82; /* all caps, no descenders, so the line box can hug the letters */
+      letter-spacing: -0.01em;
+      margin-top: 0.04em;
+      font-size: 30vw; /* starting size; the script scales it */
+    }
+  </style>
+</head>
+<body>
+  <main id="stage">
+    <h1 id="msg"><span id="lead">THE ONLY CONNECTION YOU NEED IS</span> <strong id="god">GOD</strong></h1>
+  </main>
+
+  <script>
+    // Largest font size (binary search) at which test() still passes.
+    function largest(el, test, lo, hi) {
+      while (hi - lo > 0.5) {
+        const mid = (lo + hi) / 2;
+        el.style.fontSize = mid + 'px';
+        if (test()) lo = mid; else hi = mid;
+      }
+      el.style.fontSize = lo + 'px';
+      return lo;
+    }
+
+    // Share of the screen height GOD may take at most. In portrait the
+    // screen width is the limit, so GOD runs edge to edge; this cap only
+    // matters in landscape, where it leaves room for the first line.
+    const GOD_MAX_HEIGHT = 0.68;
+
+    function fit() {
+      const stage = document.getElementById('stage');
+      const msg = document.getElementById('msg');
+      const lead = document.getElementById('lead');
+      const god = document.getElementById('god');
+      const W = stage.clientWidth;
+      const H = stage.clientHeight;
+
+      // 1. GOD first: as big as the width allows, within its height share.
+      lead.style.fontSize = '1px';
+      const godSize = largest(god, () =>
+        god.scrollWidth <= W && god.offsetHeight <= H * GOD_MAX_HEIGHT, 8, 3000);
+
+      // 2. The first line fills whatever space is left, and never
+      //    grows past half of GOD's size so GOD stays dominant.
+      largest(lead, () =>
+        lead.scrollWidth <= W && msg.offsetHeight <= H, 6, godSize * 0.5);
+    }
+
+    fit();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+  </script>
+</body>
+</html>
